@@ -21,12 +21,14 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Custom checkout step with scmGit
-                checkout([
-                    $class: 'GitSCM', 
-                    branches: [[name: '**']], 
-                    extensions: [], 
-                    userRemoteConfigs: [[url: 'https://github.com/asa-96/example.git']]
-                ])
+                script {
+                    checkout([
+                        $class: 'GitSCM', 
+                        branches: [[name: "*/${source_branch}"]], 
+                        extensions: [], 
+                        userRemoteConfigs: [[url: 'https://github.com/asa-96/example.git']]
+                    ])
+                }
             }
         }
     }
