@@ -1,26 +1,32 @@
 pipeline {
     agent any
-    environment {
-        // Environment variables to capture webhook parameters
-        ACTION = "${action}"
-        BASE_BRANCH = "${base_branch}"
-        TARGET_BRANCH = "${target_branch}"
+
+    triggers {
+        GenericTrigger(
+            genericVariables: [
+                [key: 'action', value: '$.action'],
+                [key: 'source_branch', value: '$.pull_request.head.ref'],
+                [key: 'target_branch', value: '$.pull_request.base.ref']
+            ],
+            causeString: 'Triggered by PR from ${source_branch} to ${target_branch}',
+            token: 'demo', // Ensure this token matches the one configured in the webhook
+            printContributedVariables: false,
+            printPostContent: true,
+            regexpFilterText: '''${action}\n${source_branch}\n${target_branch}''',
+            regexpFilterExpression: '^opened\n.*\nmain$'
+        )
     }
 
     stages {
-        stage('Checkout Code') {
-            when {
-                allOf {
-                    expression { return env.ACTION == 'opened' }
-                    expression { return env.BASE_BRANCH == 'main' }
-                }
-            }
+        stage('Checkout') {
             steps {
-                echo 'PR opened to main branch. Checking out code...'
-                checkout([$class: 'GitSCM', branches: [[name: "*/${TARGET_BRANCH}"]],
-                          userRemoteConfigs: [[url: 'https://github.com/asa-96/example.git']]])
-                // Replace the URL with your repository URL
-                echo 'Code checked out successfully.'
+                // Custom checkout step with scmGit
+                checkout([
+                    $class: 'GitSCM', 
+                    branches: [[name: '**']], 
+                    extensions: [], 
+                    userRemoteConfigs: [[url: 'https://github.com/asa-96/example.git']]
+                ])
             }
         }
     }
