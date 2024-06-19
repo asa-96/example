@@ -10,8 +10,9 @@ pipeline {
             ],
             causeString: 'Triggered by PR from ${source_branch} to ${target_branch}',
             token: 'demo', // Ensure this token matches the one configured in the webhook
-            printContributedVariables: false,
+            printContributedVariables: true,
             printPostContent: false,
+            silentResponse: true,
             regexpFilterText: '''${action}\n${source_branch}\n${target_branch}''',
             regexpFilterExpression: '^opened\n.*\nmain$'
         )
@@ -34,5 +35,3 @@ pipeline {
         }
     }
 }
-
-
